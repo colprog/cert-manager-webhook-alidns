@@ -1,21 +1,21 @@
-apiVersion: certmanager.k8s.io/v1alpha1
+apiVersion: cert-manager.io/v1alpha2
 kind: ClusterIssuer
 metadata:
   name: letsencrypt-prod
 spec:
   acme:
     server: https://acme-v02.api.letsencrypt.org/directory
-    email: youremail@163.com
+    email: bergren.lam@icloud.com
     privateKeySecretRef:
       name: letsencrypt-prod
     solvers:
     - selector: 
         dnsNames:
-        - '*.yourdomain.com'
+        - '*.linshibin.com'
       dns01:
         webhook:
           config:
-            accessKeyId: yourAKID
+            accessKeyId: LTAI4FnnHGqj86hphKJtZE85
             accessKeySecretRef:
               key: accessKeySecret
               name: alidns-credentials

@@ -4,14 +4,14 @@ metadata:
   name: demo-ingress
   namespace: default
   annotations:
-    certmanager.k8s.io/cluster-issuer: "letsencrypt-prod"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   tls:
   - hosts:
-    - '*.yourdomain.com'
-    secretName: yourdomain-com-tls
+    - '*.linshibin.com'
+    secretName: linshibin-com-tls
   rules:
-  - host: www.yourdomain.com
+  - host: www.linshibin.com
     http:
       paths:
       - path: /
@@ -19,7 +19,7 @@ spec:
           serviceName: nginx
           servicePort: 80
 ---
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nginx
@@ -27,9 +27,13 @@ metadata:
     component: nginx
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
   template:
     metadata:
       labels:
+        app: nginx
         component: nginx
     spec:
       containers:

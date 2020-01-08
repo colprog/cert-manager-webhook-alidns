@@ -17,3 +17,4 @@ _out/
 
 # idea
 .idea/
+.DS_Store
