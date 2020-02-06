@@ -19,9 +19,6 @@ rules:
       - ''
     resources:
       - 'secrets'
-    resourceNames:
-      - 'alidns-credentials'
-      - 'regsecret'
     verbs:
       - 'get'
       - 'watch'

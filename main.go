@@ -61,6 +61,7 @@ type aliyunDNSProviderSolver struct {
 type aliyunDNSProviderConfig struct {
 	RegionId           string                                 `json:"regionId"`
 	AccessKeyId        string                                 `json:"accessKeyId"`
+	AccessKeyIdRef     certmanager_v1alpha1.SecretKeySelector `json:"accessKeyIdRef"`
 	AccessKeySecret    string                                 `json:"accessKeySecret"`
 	AccessKeySecretRef certmanager_v1alpha1.SecretKeySelector `json:"accessKeySecretRef"`
 	TTL                *int                                   `json:"ttl"`
@@ -191,6 +192,25 @@ func loadConfig(cfgJSON *extapi.JSON) (aliyunDNSProviderConfig, error) {
 
 func (c *aliyunDNSProviderSolver) getDnsClient(ch *v1alpha1.ChallengeRequest, cfg aliyunDNSProviderConfig) (*alidns.Client, error) {
 	accessKeyId := cfg.AccessKeyId
+	if accessKeyId == "" {
+		ref := cfg.AccessKeyIdRef
+		if ref.Key == "" {
+			return nil, fmt.Errorf("no accessKeyId for %q in secret '%s/%s'", ref.Name, ref.Key, ch.ResourceNamespace)
+		}
+		if ref.Name == "" {
+			return nil, fmt.Errorf("no accessKeyId for %q in secret '%s/%s'", ref.Name, ref.Key, ch.ResourceNamespace)
+		}
+		secret, err := c.client.CoreV1().Secrets(ch.ResourceNamespace).Get(ref.Name, metav1.GetOptions{})
+		if err != nil {
+			return nil, err
+		}
+
+		accessKeyIdRef, ok := secret.Data[ref.Key]
+		if !ok {
+			return nil, fmt.Errorf("no accessKeyId for %q in secret '%s/%s'", ref.Name, ref.Key, ch.ResourceNamespace)
+		}
+		accessKeyId = fmt.Sprintf("%s", accessKeyIdRef)
+	}
 	client, ok := c.dnsClients[accessKeyId]
 
 	if ok {
