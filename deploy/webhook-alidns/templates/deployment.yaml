@@ -21,6 +21,10 @@ spec:
         release: {{ .Release.Name }}
     spec:
       serviceAccountName: {{ include "webhook-alidns.fullname" . }}
+    {{- if .Values.image.privateRegistrySecretName }}
+      imagePullSecrets:
+        - name: {{ .Values.image.privateRegistrySecretName }}
+    {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"

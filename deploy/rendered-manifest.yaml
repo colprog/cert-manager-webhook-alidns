@@ -1,15 +1,119 @@
+Release "cert-manager-webhook-alidns" does not exist. Installing it now.
+NAME: cert-manager-webhook-alidns
+LAST DEPLOYED: Thu Feb  6 09:40:14 2020
+NAMESPACE: cert-manager
+STATUS: pending-install
+REVISION: 1
+TEST SUITE: None
+HOOKS:
+MANIFEST:
 ---
 # Source: webhook-alidns/templates/rbac.yaml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: cert-manager-webhook-alidns
+  namespace: "cert-manager"
   labels:
     app: webhook-alidns
     chart: webhook-alidns-0.1.0
     release: cert-manager-webhook-alidns
-    heritage: Tiller
+    heritage: Helm
 ---
+# Source: webhook-alidns/templates/rbac.yaml
+# Grant cert-manager permission to validate using our apiserver
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: cert-manager-webhook-alidns:domain-solver
+  labels:
+    app: webhook-alidns
+    chart: webhook-alidns-0.1.0
+    release: cert-manager-webhook-alidns
+    heritage: Helm
+rules:
+  - apiGroups:
+      - certmanager.webhook.alidns
+    resources:
+      - '*'
+    verbs:
+      - 'create'
+---
+# Source: webhook-alidns/templates/rbac.yaml
+#Define the ClusterRole which has the access tls secrets
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: cert-manager-webhook-alidns:secret-reader
+rules:
+  - apiGroups:
+      - ''
+    resources:
+      - 'secrets'
+    resourceNames:
+      - 'alidns-credentials'
+    verbs:
+      - 'get'
+      - 'watch'
+---
+# Source: webhook-alidns/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: cert-manager-webhook-alidns:domain-solver
+  labels:
+    app: webhook-alidns
+    chart: webhook-alidns-0.1.0
+    release: cert-manager-webhook-alidns
+    heritage: Helm
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cert-manager-webhook-alidns:domain-solver
+subjects:
+  - apiGroup: ""
+    kind: ServiceAccount
+    name: cert-manager
+    namespace: cert-manager
+---
+# Source: webhook-alidns/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: cert-manager-webhook-alidns:secret-reader
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cert-manager-webhook-alidns:secret-reader
+subjects:
+  - apiGroup: ""
+    kind: ServiceAccount
+    name: cert-manager-webhook-alidns
+    namespace: "cert-manager"
+---
+# Source: webhook-alidns/templates/rbac.yaml
+# apiserver gets the auth-delegator role to delegate auth decisions to
+# the core apiserver
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: cert-manager-webhook-alidns:auth-delegator
+  labels:
+    app: webhook-alidns
+    chart: webhook-alidns-0.1.0
+    release: cert-manager-webhook-alidns
+    heritage: Helm
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:auth-delegator
+subjects:
+  - apiGroup: ""
+    kind: ServiceAccount
+    name: cert-manager-webhook-alidns
+    namespace: cert-manager
+---
+# Source: webhook-alidns/templates/rbac.yaml
 # Grant the webhook permission to read the ConfigMap containing the Kubernetes
 # apiserver's requestheader-ca-certificate.
 # This ConfigMap is automatically created by the Kubernetes apiserver.
@@ -22,7 +126,7 @@ metadata:
     app: webhook-alidns
     chart: webhook-alidns-0.1.0
     release: cert-manager-webhook-alidns
-    heritage: Tiller
+    heritage: Helm
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -31,77 +135,19 @@ subjects:
   - apiGroup: ""
     kind: ServiceAccount
     name: cert-manager-webhook-alidns
-    namespace: default
----
-# apiserver gets the auth-delegator role to delegate auth decisions to
-# the core apiserver
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
-metadata:
-  name: cert-manager-webhook-alidns:auth-delegator
-  labels:
-    app: webhook-alidns
-    chart: webhook-alidns-0.1.0
-    release: cert-manager-webhook-alidns
-    heritage: Tiller
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: system:auth-delegator
-subjects:
-  - apiGroup: ""
-    kind: ServiceAccount
-    name: cert-manager-webhook-alidns
-    namespace: default
----
-# Grant cert-manager permission to validate using our apiserver
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRole
-metadata:
-  name: cert-manager-webhook-alidns:domain-solver
-  labels:
-    app: webhook-alidns
-    chart: webhook-alidns-0.1.0
-    release: cert-manager-webhook-alidns
-    heritage: Tiller
-rules:
-  - apiGroups:
-      - acme.lin07.me
-    resources:
-      - '*'
-    verbs:
-      - 'create'
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
-metadata:
-  name: cert-manager-webhook-alidns:domain-solver
-  labels:
-    app: webhook-alidns
-    chart: webhook-alidns-0.1.0
-    release: cert-manager-webhook-alidns
-    heritage: Tiller
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: cert-manager-webhook-alidns:domain-solver
-subjects:
-  - apiGroup: ""
-    kind: ServiceAccount
-    name: cert-manager
     namespace: cert-manager
-
 ---
 # Source: webhook-alidns/templates/service.yaml
 apiVersion: v1
 kind: Service
 metadata:
   name: cert-manager-webhook-alidns
+  namespace: "cert-manager"
   labels:
     app: webhook-alidns
     chart: webhook-alidns-0.1.0
     release: cert-manager-webhook-alidns
-    heritage: Tiller
+    heritage: Helm
 spec:
   type: ClusterIP
   ports:
@@ -112,18 +158,18 @@ spec:
   selector:
     app: webhook-alidns
     release: cert-manager-webhook-alidns
-
 ---
 # Source: webhook-alidns/templates/deployment.yaml
-apiVersion: apps/v1beta2
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: cert-manager-webhook-alidns
+  namespace: "cert-manager"
   labels:
     app: webhook-alidns
     chart: webhook-alidns-0.1.0
     release: cert-manager-webhook-alidns
-    heritage: Tiller
+    heritage: Helm
 spec:
   replicas: 
   selector:
@@ -137,16 +183,18 @@ spec:
         release: cert-manager-webhook-alidns
     spec:
       serviceAccountName: cert-manager-webhook-alidns
+      imagePullSecrets:
+        - name: regsecret
       containers:
         - name: webhook-alidns
-          image: "lin07/cert-manager-webhook-alidns:latest"
-          imagePullPolicy: IfNotPresent
+          image: "registry.cn-shenzhen.aliyuncs.com/adboard/cert-manager-webhook-alidns:latest"
+          imagePullPolicy: Always
           args:
             - --tls-cert-file=/tls/tls.crt
             - --tls-private-key-file=/tls/tls.key
           env:
             - name: GROUP_NAME
-              value: "acme.lin07.me"
+              value: "certmanager.webhook.alidns"
           ports:
             - name: https
               containerPort: 443
@@ -167,65 +215,44 @@ spec:
               readOnly: true
           resources:
             {}
-            
       volumes:
         - name: certs
           secret:
             secretName: cert-manager-webhook-alidns-webhook-tls
-
 ---
 # Source: webhook-alidns/templates/apiservice.yaml
 apiVersion: apiregistration.k8s.io/v1beta1
 kind: APIService
 metadata:
-  name: v1alpha1.acme.lin07.me
+  name: v1alpha1.certmanager.webhook.alidns
   labels:
     app: webhook-alidns
     chart: webhook-alidns-0.1.0
     release: cert-manager-webhook-alidns
-    heritage: Tiller
+    heritage: Helm
   annotations:
-    certmanager.k8s.io/inject-ca-from: "default/cert-manager-webhook-alidns-webhook-tls"
+    cert-manager.io/inject-ca-from: "cert-manager/cert-manager-webhook-alidns-webhook-tls"
 spec:
-  group: acme.lin07.me
+  group: certmanager.webhook.alidns
   groupPriorityMinimum: 1000
   versionPriority: 15
   service:
     name: cert-manager-webhook-alidns
-    namespace: default
+    namespace: cert-manager
   version: v1alpha1
-
 ---
 # Source: webhook-alidns/templates/pki.yaml
----
-# Create a selfsigned Issuer, in order to create a root CA certificate for
-# signing webhook serving certificates
-apiVersion: certmanager.k8s.io/v1alpha1
-kind: Issuer
-metadata:
-  name: cert-manager-webhook-alidns-selfsign
-  namespace: "default"
-  labels:
-    app: webhook-alidns
-    chart: webhook-alidns-0.1.0
-    release: cert-manager-webhook-alidns
-    heritage: Tiller
-spec:
-  selfSigned: {}
-
----
-
 # Generate a CA Certificate used to sign certificates for the webhook
-apiVersion: certmanager.k8s.io/v1alpha1
+apiVersion: cert-manager.io/v1alpha2
 kind: Certificate
 metadata:
   name: cert-manager-webhook-alidns-ca
-  namespace: "default"
+  namespace: "cert-manager"
   labels:
     app: webhook-alidns
     chart: webhook-alidns-0.1.0
     release: cert-manager-webhook-alidns
-    heritage: Tiller
+    heritage: Helm
 spec:
   secretName: cert-manager-webhook-alidns-ca
   duration: 43800h # 5y
@@ -233,37 +260,19 @@ spec:
     name: cert-manager-webhook-alidns-selfsign
   commonName: "ca.webhook-alidns.cert-manager"
   isCA: true
-
 ---
-
-# Create an Issuer that uses the above generated CA certificate to issue certs
-apiVersion: certmanager.k8s.io/v1alpha1
-kind: Issuer
-metadata:
-  name: cert-manager-webhook-alidns-ca
-  namespace: "default"
-  labels:
-    app: webhook-alidns
-    chart: webhook-alidns-0.1.0
-    release: cert-manager-webhook-alidns
-    heritage: Tiller
-spec:
-  ca:
-    secretName: cert-manager-webhook-alidns-ca
-
----
-
+# Source: webhook-alidns/templates/pki.yaml
 # Finally, generate a serving certificate for the webhook to use
-apiVersion: certmanager.k8s.io/v1alpha1
+apiVersion: cert-manager.io/v1alpha2
 kind: Certificate
 metadata:
   name: cert-manager-webhook-alidns-webhook-tls
-  namespace: "default"
+  namespace: "cert-manager"
   labels:
     app: webhook-alidns
     chart: webhook-alidns-0.1.0
     release: cert-manager-webhook-alidns
-    heritage: Tiller
+    heritage: Helm
 spec:
   secretName: cert-manager-webhook-alidns-webhook-tls
   duration: 8760h # 1y
@@ -271,6 +280,38 @@ spec:
     name: cert-manager-webhook-alidns-ca
   dnsNames:
   - cert-manager-webhook-alidns
-  - cert-manager-webhook-alidns.default
-  - cert-manager-webhook-alidns.default.svc
+  - cert-manager-webhook-alidns.cert-manager
+  - cert-manager-webhook-alidns.cert-manager.svc
+---
+# Source: webhook-alidns/templates/pki.yaml
+# Create a selfsigned Issuer, in order to create a root CA certificate for
+# signing webhook serving certificates
+apiVersion: cert-manager.io/v1alpha2
+kind: Issuer
+metadata:
+  name: cert-manager-webhook-alidns-selfsign
+  namespace: "cert-manager"
+  labels:
+    app: webhook-alidns
+    chart: webhook-alidns-0.1.0
+    release: cert-manager-webhook-alidns
+    heritage: Helm
+spec:
+  selfSigned: {}
+---
+# Source: webhook-alidns/templates/pki.yaml
+# Create an Issuer that uses the above generated CA certificate to issue certs
+apiVersion: cert-manager.io/v1alpha2
+kind: Issuer
+metadata:
+  name: cert-manager-webhook-alidns-ca
+  namespace: "cert-manager"
+  labels:
+    app: webhook-alidns
+    chart: webhook-alidns-0.1.0
+    release: cert-manager-webhook-alidns
+    heritage: Helm
+spec:
+  ca:
+    secretName: cert-manager-webhook-alidns-ca
 
