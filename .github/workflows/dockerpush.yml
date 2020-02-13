@@ -15,7 +15,7 @@ on:
 
 env:
   # TODO: Change variable to your image's name.
-  IMAGE_NAME: colprog/cert-manager-webhook-alidns
+  IMAGE_NAME: cert-manager-webhook-alidns
 
 jobs:
   # Run tests.
