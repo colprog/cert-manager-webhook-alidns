@@ -5,7 +5,7 @@ https://blog.csdn.net/lwlfox/article/details/100989175
 ## Installation
 
 ```bash
-$ helm install --name cert-manager-webhook-alidns --namespace=cert-manager ./deploy/webhook-alidns
+$ helm install cert-manager-webhook-alidns ./deploy/webhook-alidns -n cert-man
 or 
 $ hell install --name cert-manager-webhook-alidns --namespace=cert-manager --set image.repository=<your repo>/cert-manager-webhook-alidns \
 --set image.tag=latest ./deploy/webhook-alidns
