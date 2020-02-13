@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/alidns"
-	certmanager_v1alpha1 "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha1"
+	cmmeta "github.com/jetstack/cert-manager/pkg/apis/meta/v1"
 	"github.com/jetstack/cert-manager/pkg/issuer/acme/dns/util"
 	extapi "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -61,9 +61,9 @@ type aliyunDNSProviderSolver struct {
 type aliyunDNSProviderConfig struct {
 	RegionId           string                                 `json:"regionId"`
 	AccessKeyId        string                                 `json:"accessKeyId"`
-	AccessKeyIdRef     certmanager_v1alpha1.SecretKeySelector `json:"accessKeyIdRef"`
+	AccessKeyIdRef     cmmeta.SecretKeySelector `json:"accessKeyIdRef"`
 	AccessKeySecret    string                                 `json:"accessKeySecret"`
-	AccessKeySecretRef certmanager_v1alpha1.SecretKeySelector `json:"accessKeySecretRef"`
+	AccessKeySecretRef cmmeta.SecretKeySelector `json:"accessKeySecretRef"`
 	TTL                *int                                   `json:"ttl"`
 }
 

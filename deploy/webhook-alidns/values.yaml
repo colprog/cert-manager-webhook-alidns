@@ -13,9 +13,9 @@ certManager:
   serviceAccountName: cert-manager
 
 image:
-  repository: registry.cn-shenzhen.aliyuncs.com/adboard/cert-manager-webhook-alidns
+  repository: docker.pkg.github.com/colprog/cert-manager-webhook-alidns/cert-manager-webhook-alidns:latest
   tag: latest
-  pullPolicy: Always
+  pullPolicy: IfNotPresent
   privateRegistrySecretName: regsecret
 
 service:
